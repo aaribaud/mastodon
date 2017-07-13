@@ -11,31 +11,13 @@ function emojify(str) {
   // The goal is to be the same as an emojione.regShortNames/regUnicode replacement, but faster.
   let i = -1;
   let insideTag = false;
-  let insideShortname = false;
-  let shortnameStartIndex = -1;
   let match;
   while (++i < str.length) {
     const char = str.charAt(i);
-    if (insideShortname && char === ':') {
-      const shortname = str.substring(shortnameStartIndex, i + 1);
-      if (shortname in emojione.emojioneList) {
-        const unicode = emojione.emojioneList[shortname].unicode[emojione.emojioneList[shortname].unicode.length - 1];
-        const alt = emojione.convert(unicode.toUpperCase());
-        const replacement = `<img draggable="false" class="emojione" alt="${alt}" title="${shortname}" src="/emoji/${unicode}.svg" />`;
-        str = str.substring(0, shortnameStartIndex) + replacement + str.substring(i + 1);
-        i += (replacement.length - shortname.length - 1); // jump ahead the length we've added to the string
-      } else {
-        i--; // stray colon, try again
-      }
-      insideShortname = false;
-    } else if (insideTag && char === '>') {
+    if (insideTag && char === '>') {
       insideTag = false;
     } else if (char === '<') {
       insideTag = true;
-      insideShortname = false;
-    } else if (!insideTag && char === ':') {
-      insideShortname = true;
-      shortnameStartIndex = i;
     } else if (!insideTag && (match = trie.search(str.substring(i)))) {
       const unicodeStr = match;
       if (unicodeStr in emojione.jsEscapeMap) {
